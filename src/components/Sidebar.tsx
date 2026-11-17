@@ -1,8 +1,11 @@
 import { useState } from "react";
 import type { CategoryKey, Company } from "../types";
 import { CATEGORIES, CATEGORY_KEYS } from "../lib/categories";
+import { DETAILS, DETAIL_KEYS, type DetailKey, type DetailsState } from "../lib/mapDetails";
 
 interface Props {
+  details: DetailsState;
+  onDetail: (k: DetailKey, v: boolean) => void;
   radiusKm: number;
   onRadius: (v: number) => void;
   onLocate: () => void;
@@ -46,6 +49,18 @@ export function Sidebar(p: Props) {
           Masquer les entrepreneurs individuels
         </label>
       </div>
+
+      <details className="details">
+        <summary>Détails de la carte</summary>
+        <div className="details-grid">
+          {DETAIL_KEYS.map((k) => (
+            <label key={k} className="small">
+              <input type="checkbox" checked={p.details[k]} onChange={(e) => p.onDetail(k, e.target.checked)} />
+              {DETAILS[k].label}
+            </label>
+          ))}
+        </div>
+      </details>
 
       <div className="chips">
         {CATEGORY_KEYS.filter((k) => counts[k] || p.allCompanies.length === 0).map((k) => (

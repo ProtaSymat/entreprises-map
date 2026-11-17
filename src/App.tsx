@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { CategoryKey, Company, LatLng } from "./types";
 import { CATEGORY_KEYS } from "./lib/categories";
+import { DEFAULT_DETAILS, type DetailKey, type DetailsState } from "./lib/mapDetails";
 import { geocode } from "./api/geocode";
 import { useCompanies } from "./hooks/useCompanies";
 import { MapView } from "./components/MapView";
@@ -12,6 +13,7 @@ export default function App() {
   const [hideSoleTraders, setHideSoleTraders] = useState(true);
   const [active, setActive] = useState<Set<CategoryKey>>(new Set(CATEGORY_KEYS));
   const [selected, setSelected] = useState<Company | null>(null);
+  const [details, setDetails] = useState<DetailsState>(DEFAULT_DETAILS);
   const [message, setMessage] = useState("Clique sur « Ma position » ou cherche une adresse.");
 
   const { companies, loading, error, hasMore, loadMore } = useCompanies(center, radiusKm);
@@ -61,6 +63,8 @@ export default function App() {
   return (
     <div className="app">
       <Sidebar
+        details={details}
+        onDetail={(k: DetailKey, v: boolean) => setDetails((prev) => ({ ...prev, [k]: v }))}
         radiusKm={radiusKm}
         onRadius={setRadiusKm}
         onLocate={locate}
@@ -77,7 +81,7 @@ export default function App() {
         loading={loading}
         onMore={loadMore}
       />
-      <MapView center={center} radiusKm={radiusKm} companies={visible} selected={selected} onSelect={setSelected} />
+      <MapView center={center} radiusKm={radiusKm} companies={visible} selected={selected} details={details} onSelect={setSelected} />
     </div>
   );
 }

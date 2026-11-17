@@ -1,9 +1,11 @@
 import { useEffect } from "react";
-import { Circle, CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { Company, LatLng } from "../types";
+import type { DetailsState } from "../lib/mapDetails";
 import { CATEGORIES } from "../lib/categories";
 import { CompanyDetails } from "./CompanyDetails";
+import { VectorBaseLayer } from "./VectorBaseLayer";
 
 function Controller({ center, radiusKm, selected }: { center: LatLng | null; radiusKm: number; selected: Company | null }) {
   const map = useMap();
@@ -21,13 +23,22 @@ interface Props {
   radiusKm: number;
   companies: Company[];
   selected: Company | null;
+  details: DetailsState;
   onSelect: (c: Company | null) => void;
 }
 
-export function MapView({ center, radiusKm, companies, selected, onSelect }: Props) {
+export function MapView({ center, radiusKm, companies, selected, details, onSelect }: Props) {
   return (
-    <MapContainer center={[46.6, 2.5]} zoom={6} className="map">
-      <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" maxZoom={19} />
+    <MapContainer
+      center={[46.6, 2.5]}
+      zoom={6}
+      minZoom={3}
+      maxZoom={19}
+      maxBounds={[[-85, -Infinity], [85, Infinity]]}
+      maxBoundsViscosity={1}
+      className="map"
+    >
+      <VectorBaseLayer details={details} />
       <Controller center={center} radiusKm={radiusKm} selected={selected} />
       {center && (
         <Circle center={[center.lat, center.lng]} radius={radiusKm * 1000} pathOptions={{ color: "#2563eb", weight: 1, fillOpacity: 0.05 }} interactive={false} />
@@ -47,6 +58,11 @@ export function MapView({ center, radiusKm, companies, selected, onSelect }: Pro
           )}
         </CircleMarker>
       ))}
+      <div className="attribution">
+        <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>{" "}
+        &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a>{" "}
+        Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
+      </div>
     </MapContainer>
   );
 }
