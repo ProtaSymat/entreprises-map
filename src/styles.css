@@ -47,3 +47,96 @@ label.small input[type=range] { flex: 1; }
 .details-grid { display: grid; gap: 6px; padding-top: 8px; }
 .attribution { position: absolute; right: 0; bottom: 0; z-index: 1000; background: rgba(255,255,255,.8); color: #333; font-size: 11px; padding: 1px 6px; }
 .attribution a { color: #333; }
+
+/* ================= Recherche ================= */
+.sb { position: relative; }
+.sb-field { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 10px 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); transition: border-color .2s, box-shadow .2s; }
+.sb-field:focus-within { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .16); }
+.sb-field > svg { flex: none; color: var(--muted); }
+.sb-field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 15px; }
+.sb-spin { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: #2563eb; animation: spin .7s linear infinite; }
+.sb-clear { flex: none; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--line); color: var(--muted); font-size: 15px; line-height: 1; }
+.sb-pop { position: absolute; z-index: 2000; left: 0; right: 0; top: calc(100% + 6px); border: 1px solid var(--line); border-radius: 14px; background: var(--bg); box-shadow: 0 18px 44px rgba(0, 0, 0, .2); overflow: hidden; transform-origin: top; animation: pop-in .18s ease-out; }
+.sb-list { list-style: none; margin: 0; padding: 6px; max-height: min(52vh, 380px); overflow: auto; }
+.sb-group { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 4px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.sb-group button { padding: 0; border: 0; background: none; color: #2563eb; font-size: 11px; letter-spacing: 0; text-transform: none; }
+.sb-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; animation: item-in .22s ease-out both; }
+.sb-item.active { background: rgba(37, 99, 235, .12); }
+.sb-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: rgba(37, 99, 235, .13); color: #2563eb; transition: transform .15s; }
+.sb-ico.address { background: rgba(236, 72, 153, .13); color: #ec4899; }
+.sb-item.active .sb-ico { transform: scale(1.08); }
+.sb-txt { display: flex; flex-direction: column; min-width: 0; }
+.sb-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.sb-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-nm mark { background: none; color: #2563eb; }
+.sb-badge { flex: none; padding: 1px 7px; border-radius: 999px; background: #f59e0b; color: #1b1f24; font-size: 11px; font-style: normal; font-weight: 700; }
+.sb-ctx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--muted); }
+.sb-note { margin: 8px 8px 0; padding: 8px 10px; border-radius: 10px; background: rgba(245, 158, 11, .16); font-size: 12px; line-height: 1.35; }
+.sb-note.nudge { animation: shake .35s; background: rgba(245, 158, 11, .3); }
+.sb-note.error { background: rgba(239, 68, 68, .14); }
+.sb-empty { padding: 14px 14px; font-size: 13px; color: var(--muted); }
+.sb-foot { display: flex; gap: 14px; padding: 7px 12px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.sb-foot kbd { display: inline-block; min-width: 16px; margin-right: 3px; padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); font: inherit; text-align: center; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-6px) scaleY(.96); } to { opacity: 1; transform: none; } }
+@keyframes item-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* ================= Carte animée ================= */
+/* Repère du lieu */
+.cm-wrap { background: none; border: 0; }
+.cm { position: relative; width: 0; height: 0; }
+.cm i { position: absolute; left: 0; top: 0; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+.cm .core { width: 16px; height: 16px; background: #2563eb; border: 3px solid #fff; box-shadow: 0 2px 12px rgba(37, 99, 235, .7); animation: core-in .6s cubic-bezier(.2, 1.6, .4, 1) both; transition: background .3s; }
+.cm .ring { width: 16px; height: 16px; border: 2px solid rgba(37, 99, 235, .75); opacity: 0; animation: ring 2.8s cubic-bezier(.2, .6, .3, 1) infinite; }
+.cm .r2 { animation-delay: .93s; }
+.cm .r3 { animation-delay: 1.86s; }
+.is-scanning .cm .core { background: #f59e0b; }
+.is-scanning .cm .ring { border-color: rgba(245, 158, 11, .9); animation-duration: 1.3s; }
+.cm .tag { position: absolute; left: 0; bottom: 24px; white-space: nowrap; padding: 5px 11px; border-radius: 999px; background: #fff; color: #111827; font: 600 12px system-ui, sans-serif; box-shadow: 0 6px 20px rgba(0, 0, 0, .28); animation: tag-in .55s 1.2s cubic-bezier(.2, 1.4, .4, 1) both; }
+.cm .tag::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; background: #fff; transform: translateX(-50%) rotate(45deg); }
+@keyframes ring { 0% { transform: translate(-50%, -50%) scale(1); opacity: .9; } 100% { transform: translate(-50%, -50%) scale(10); opacity: 0; } }
+@keyframes core-in { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+@keyframes tag-in { from { opacity: 0; transform: translate(-50%, 8px) scale(.7); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+
+/* Cercle de rayon : tirets qui défilent */
+path.radius-ring { stroke-dasharray: 8 8; animation: march 1.6s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -32; } }
+
+/* Entreprises : apparition en cascade */
+path.dot-pop { transform-box: fill-box; transform-origin: center; cursor: pointer; animation: dot-in .5s cubic-bezier(.2, 1.5, .4, 1) both; transition: filter .15s; }
+path.dot-pop:hover { filter: brightness(1.08) drop-shadow(0 0 5px rgba(0, 0, 0, .4)); }
+@keyframes dot-in { from { opacity: 0; transform: scale(.1); } to { opacity: 1; transform: scale(1); } }
+
+/* Entreprise sélectionnée : halo qui pulse */
+path.halo-pulse { pointer-events: none; transform-box: fill-box; transform-origin: center; animation: halo 1.7s ease-out infinite; }
+@keyframes halo { 0% { transform: scale(.55); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* Bandeau flottant */
+.hud { position: absolute; z-index: 1000; top: 14px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; max-width: calc(100% - 140px); padding: 8px 15px; border-radius: 999px; background: rgba(255, 255, 255, .93); backdrop-filter: blur(8px); color: #111827; font-size: 13px; white-space: nowrap; box-shadow: 0 8px 26px rgba(0, 0, 0, .2); pointer-events: none; animation: hud-in .6s .2s cubic-bezier(.2, 1.3, .4, 1) both; }
+.hud b { overflow: hidden; text-overflow: ellipsis; }
+.hud-sep { color: #9ca3af; }
+.hud-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34, 197, 94, .6); }
+.hud-dot.busy { background: #f59e0b; animation: blink 1s ease-in-out infinite; }
+@keyframes hud-in { from { opacity: 0; transform: translate(-50%, -16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes blink { 50% { opacity: .35; } }
+
+/* Décalage de la cascade (sélecteur plus spécifique que le raccourci `animation` ci-dessus) */
+path.dot-pop.dp0 { animation-delay: 0ms; }
+path.dot-pop.dp1 { animation-delay: 45ms; }
+path.dot-pop.dp2 { animation-delay: 90ms; }
+path.dot-pop.dp3 { animation-delay: 135ms; }
+path.dot-pop.dp4 { animation-delay: 180ms; }
+path.dot-pop.dp5 { animation-delay: 225ms; }
+path.dot-pop.dp6 { animation-delay: 270ms; }
+path.dot-pop.dp7 { animation-delay: 315ms; }
+path.dot-pop.dp8 { animation-delay: 360ms; }
+path.dot-pop.dp9 { animation-delay: 405ms; }
+path.dot-pop.dp10 { animation-delay: 450ms; }
+path.dot-pop.dp11 { animation-delay: 495ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cm .ring, path.radius-ring, path.halo-pulse, .hud-dot.busy { animation: none; }
+  path.dot-pop, .hud, .cm .tag, .cm .core, .sb-pop, .sb-item { animation-duration: .01ms; animation-delay: 0s; }
+}

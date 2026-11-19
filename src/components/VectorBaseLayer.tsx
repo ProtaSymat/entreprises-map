@@ -2,8 +2,13 @@ import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
-import type { Map as GLMap } from "maplibre-gl";
+import { setWorkerUrl, type Map as GLMap } from "maplibre-gl";
+// Adresse explicite du worker de MapLibre : sans elle, MapLibre 6 la déduit de l'emplacement de son script,
+// ce qui échoue avec Vite (404 sur maplibre-gl-worker.mjs), en développement comme en production.
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import { shouldHide, type DetailsState } from "../lib/mapDetails";
+
+setWorkerUrl(workerUrl);
 
 // Style vectoriel gratuit, sans clé : https://openfreemap.org
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";

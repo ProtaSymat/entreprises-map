@@ -30,6 +30,12 @@ export function CompanyDetails({ company }: { company: Company }) {
         {CATEGORIES[company.category].label} · NAF {company.naf}
         <br />
         {company.address}
+        {!company.isHeadOffice && company.headOfficeCity && (
+          <>
+            <br />
+            <em>Établissement local · siège social à {company.headOfficeCity}</em>
+          </>
+        )}
       </div>
       {company.directors.length > 0 && !company.isSoleTrader && (
         <div className="meta">Dirigeants : {company.directors.join(", ")}</div>

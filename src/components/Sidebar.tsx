@@ -1,7 +1,8 @@
-import { useState } from "react";
 import type { CategoryKey, Company } from "../types";
+import type { Place } from "../api/places";
 import { CATEGORIES, CATEGORY_KEYS } from "../lib/categories";
 import { DETAILS, DETAIL_KEYS, type DetailKey, type DetailsState } from "../lib/mapDetails";
+import { SearchBox } from "./SearchBox";
 
 interface Props {
   details: DetailsState;
@@ -9,7 +10,7 @@ interface Props {
   radiusKm: number;
   onRadius: (v: number) => void;
   onLocate: () => void;
-  onSearch: (q: string) => void;
+  onPlace: (p: Place) => void;
   hideSoleTraders: boolean;
   onHideSoleTraders: (v: boolean) => void;
   allCompanies: Company[];
@@ -24,17 +25,13 @@ interface Props {
 }
 
 export function Sidebar(p: Props) {
-  const [q, setQ] = useState("");
   const counts: Partial<Record<CategoryKey, number>> = {};
   p.allCompanies.forEach((c) => (counts[c.category] = (counts[c.category] ?? 0) + 1));
 
   return (
     <aside>
       <div className="top">
-        <form className="row" onSubmit={(e) => { e.preventDefault(); p.onSearch(q); }}>
-          <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Adresse ou ville (ex : Montpellier)" />
-          <button type="submit">Chercher</button>
-        </form>
+        <SearchBox onSelect={p.onPlace} />
         <div className="row">
           <button className="primary grow" onClick={p.onLocate}>Ma position</button>
           <button onClick={p.onMore} disabled={!p.hasMore || p.loading}>Charger plus</button>
@@ -83,7 +80,7 @@ export function Sidebar(p: Props) {
       </div>
 
       <div className="note">
-        Sources : API Recherche d'entreprises (data.gouv.fr), Géoplateforme IGN, OpenStreetMap. Respecte le RGPD/CNIL pour tout démarchage.
+        Sources : API Recherche d'entreprises, API Géo (data.gouv.fr), Géoplateforme IGN, OpenStreetMap. Respecte le RGPD/CNIL pour tout démarchage.
       </div>
     </aside>
   );

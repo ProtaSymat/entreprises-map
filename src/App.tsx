@@ -1,20 +1,21 @@
 import { useMemo, useState } from "react";
 import type { CategoryKey, Company, LatLng } from "./types";
+import type { Place } from "./api/places";
 import { CATEGORY_KEYS } from "./lib/categories";
 import { DEFAULT_DETAILS, type DetailKey, type DetailsState } from "./lib/mapDetails";
-import { geocode } from "./api/geocode";
 import { useCompanies } from "./hooks/useCompanies";
 import { MapView } from "./components/MapView";
 import { Sidebar } from "./components/Sidebar";
 
 export default function App() {
   const [center, setCenter] = useState<LatLng | null>(null);
+  const [placeLabel, setPlaceLabel] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState(1);
   const [hideSoleTraders, setHideSoleTraders] = useState(true);
   const [active, setActive] = useState<Set<CategoryKey>>(new Set(CATEGORY_KEYS));
   const [selected, setSelected] = useState<Company | null>(null);
   const [details, setDetails] = useState<DetailsState>(DEFAULT_DETAILS);
-  const [message, setMessage] = useState("Clique sur « Ma position » ou cherche une adresse.");
+  const [message, setMessage] = useState("Clique sur « Ma position » ou cherche une ville.");
 
   const { companies, loading, error, hasMore, loadMore } = useCompanies(center, radiusKm);
 
@@ -31,24 +32,20 @@ export default function App() {
     });
   }
 
+  function goTo(pos: LatLng, label: string) {
+    setSelected(null);
+    setPlaceLabel(label);
+    setCenter({ ...pos }); // nouvel objet : relance le vol même si on re-sélectionne le même lieu
+  }
+
   function locate() {
     if (!navigator.geolocation) return setMessage("Géolocalisation non supportée.");
     setMessage("Localisation…");
     navigator.geolocation.getCurrentPosition(
-      (p) => setCenter({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => setMessage("Position refusée : tape une adresse ou une ville."),
+      (p) => goTo({ lat: p.coords.latitude, lng: p.coords.longitude }, "Ma position"),
+      () => setMessage("Position refusée : cherche une ville ou une adresse."),
       { enableHighAccuracy: true, timeout: 10000 },
     );
-  }
-
-  async function search(q: string) {
-    if (!q.trim()) return;
-    try {
-      const pos = await geocode(q.trim());
-      if (pos) setCenter(pos); else setMessage("Adresse introuvable.");
-    } catch {
-      setMessage("Géocodage indisponible.");
-    }
   }
 
   const hidden = companies.length - visible.length;
@@ -68,7 +65,7 @@ export default function App() {
         radiusKm={radiusKm}
         onRadius={setRadiusKm}
         onLocate={locate}
-        onSearch={search}
+        onPlace={(p: Place) => goTo(p.position, p.label)}
         hideSoleTraders={hideSoleTraders}
         onHideSoleTraders={setHideSoleTraders}
         allCompanies={companies}
@@ -81,7 +78,17 @@ export default function App() {
         loading={loading}
         onMore={loadMore}
       />
-      <MapView center={center} radiusKm={radiusKm} companies={visible} selected={selected} details={details} onSelect={setSelected} />
+      <MapView
+        center={center}
+        placeLabel={placeLabel}
+        radiusKm={radiusKm}
+        companies={visible}
+        loading={loading}
+        selected={selected}
+        details={details}
+        onSelect={setSelected}
+        onDeselect={(c) => setSelected((prev) => (prev?.id === c.id ? null : prev))}
+      />
     </div>
   );
 }
